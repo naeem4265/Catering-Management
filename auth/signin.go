@@ -1,4 +1,4 @@
-package handlers
+package auth
 
 import (
 	"database/sql"
@@ -7,15 +7,10 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/naeem4265/Catering-Management/data"
 )
 
 var JWTKey = []byte("my_secret_key")
-
-// User credintial
-type Credential struct {
-	Password string `json:"password"`
-	Username string `json:"username"`
-}
 
 type Claims struct {
 	Username string `json:"username"`
@@ -23,7 +18,7 @@ type Claims struct {
 }
 
 func SignIn(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	var creds Credential
+	var creds data.Credential
 	// Decode Credential
 	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {

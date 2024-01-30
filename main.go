@@ -9,7 +9,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/naeem4265/api-server/handlers"
+	"github.com/naeem4265/Catering-Management/auth"
+	"github.com/naeem4265/Catering-Management/restaurants"
+	"github.com/naeem4265/Catering-Management/users"
 )
 
 func main() {
@@ -33,23 +35,30 @@ func main() {
 
 	// Use a closure to capture the 'db' object and pass it to the handler.
 	router.Post("/signin", func(w http.ResponseWriter, r *http.Request) {
-		handlers.SignIn(w, r, db)
+		auth.SignIn(w, r, db)
 	})
-	router.Get("/signout", handlers.SignOut)
-
-	router.Route("/albums", func(r chi.Router) {
+	router.Get("/signout", auth.SignOut)
+	// Create user account
+	router.Post("/createuser", func(w http.ResponseWriter, r *http.Request) {
+		users.CreateUser(w, r, db)
+	})
+	// Get all users
+	router.Route("/users", func(r chi.Router) {
 		r.Use(authentication)
-		r.Get("/", handlers.GetAlbums)
-		r.Get("/{id}", handlers.GetAlbumById)
-		r.Put("/{id}", handlers.PutAlbum)
-		r.Post("/", handlers.PostAlbum)
-		r.Delete("/{id}", handlers.DeleteAlbum)
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			users.GetUsers(w, r, db)
+		})
 	})
 
+	// Add restaurant
+	router.Post("/addrest", func(w http.ResponseWriter, r *http.Request) {
+		restaurants.AddRestaurant(w, r, db)
+	})
 	fmt.Println("Server started at :8080")
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
+// Check user authentications
 func authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Check for the "token" cookie
@@ -66,9 +75,9 @@ func authentication(next http.Handler) http.Handler {
 
 		tknStr := c.Value
 
-		claims := &handlers.Claims{}
+		claims := &auth.Claims{}
 		tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (interface{}, error) {
-			return handlers.JWTKey, nil
+			return auth.JWTKey, nil
 		})
 		if err != nil {
 			if err == jwt.ErrSignatureInvalid {
