@@ -38,26 +38,26 @@ func main() {
 		auth.SignIn(w, r, db)
 	})
 	router.Get("/signout", auth.SignOut)
-	// Create user account
-	router.Post("/createuser", func(w http.ResponseWriter, r *http.Request) {
-		users.CreateUser(w, r, db)
-	})
+
 	// Get all users
 	router.Route("/users", func(r chi.Router) {
-		r.Use(authentication)
+		// Create user account
+		router.Post("/", func(w http.ResponseWriter, r *http.Request) {
+			users.CreateUser(w, r, db)
+		})
+		// Get user list
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			users.GetUsers(w, r, db)
 		})
 	})
 
 	// Add restaurant
-	router.Post("/addrest", func(w http.ResponseWriter, r *http.Request) {
-		restaurants.AddRestaurant(w, r, db)
-	})
-
-	// Add Menu for the restaurant
-	router.Post("/addmenu", func(w http.ResponseWriter, r *http.Request) {
-		restaurants.AddMenu(w, r, db)
+	router.Route("/restaurant", func(r chi.Router) {
+		r.Use(authentication)
+		// Add restaurant
+		router.Post("/", func(w http.ResponseWriter, r *http.Request) {
+			restaurants.AddRestaurant(w, r, db)
+		})
 	})
 
 	// Get all Menus
@@ -65,6 +65,14 @@ func main() {
 		r.Use(authentication)
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			restaurants.GetMenu(w, r, db)
+		})
+		// Add Menu for the restaurant
+		r.Post("/", func(w http.ResponseWriter, r *http.Request) {
+			restaurants.AddMenu(w, r, db)
+		})
+		// Vote for menu id
+		r.Put("/vote/{id}", func(w http.ResponseWriter, r *http.Request) {
+			restaurants.VoteItem(w, r, db)
 		})
 	})
 
