@@ -60,6 +60,14 @@ func main() {
 		restaurants.AddMenu(w, r, db)
 	})
 
+	// Get all Menus
+	router.Route("/menu", func(r chi.Router) {
+		r.Use(authentication)
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			restaurants.GetMenu(w, r, db)
+		})
+	})
+
 	fmt.Println("Server started at :8080")
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

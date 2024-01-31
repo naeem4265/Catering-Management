@@ -1,4 +1,4 @@
-package users
+package restaurants
 
 import (
 	"database/sql"
@@ -8,9 +8,9 @@ import (
 	"github.com/naeem4265/Catering-Management/data"
 )
 
-func GetUsers(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+func GetMenu(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
-	rows, err := db.Query("SELECT username FROM users")
+	rows, err := db.Query("SELECT m.Id, m.Name, r.Name, r.Location, m.Price, m.Vote FROM menu m INNER JOIN restaurant r ON m.RestId = r.Id")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -18,22 +18,22 @@ func GetUsers(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	defer rows.Close()
 
 	// An user slice to hold data from returned rows.
-	var users []data.Credential
+	var items []data.Item
 
 	// Loop through rows, using Scan to assign column data to struct fields.
 	for rows.Next() {
-		var temp data.Credential
-		if err := rows.Scan(&temp.Username); err != nil {
+		var temp data.Item
+		if err := rows.Scan(&temp.Id, &temp.Name, &temp.ResName, &temp.Location, &temp.Price, &temp.Vote); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		users = append(users, temp)
+		items = append(items, temp)
 	}
-	userlist, err := json.Marshal(users)
+	itemlist, err := json.Marshal(items)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	w.Write(userlist)
+	w.Write(itemlist)
 	w.WriteHeader(http.StatusOK)
 }
