@@ -74,6 +74,10 @@ func main() {
 		r.Put("/vote/{id}", func(w http.ResponseWriter, r *http.Request) {
 			restaurants.VoteItem(w, r, db)
 		})
+		// Getting results for the current day.
+		r.Get("/today", func(w http.ResponseWriter, r *http.Request) {
+			restaurants.GetResult(w, r, db)
+		})
 	})
 
 	fmt.Println("Server started at :8080")
