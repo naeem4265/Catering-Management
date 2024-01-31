@@ -54,6 +54,12 @@ func main() {
 	router.Post("/addrest", func(w http.ResponseWriter, r *http.Request) {
 		restaurants.AddRestaurant(w, r, db)
 	})
+
+	// Add Menu for the restaurant
+	router.Post("/addmenu", func(w http.ResponseWriter, r *http.Request) {
+		restaurants.AddMenu(w, r, db)
+	})
+
 	fmt.Println("Server started at :8080")
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
