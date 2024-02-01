@@ -29,8 +29,8 @@ func VoteItem(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 // Winner for today
-func GetWinner(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	query := "SELECT m.Id, m.Name, r.Name, r.Location, m.Price, m.Vote " +
+func GetWinner(w http.ResponseWriter, r *http.Request, db *sql.DB) *data.Item {
+	query := "SELECT m.Id, m.Name, m.RestId, r.Name, r.Location, m.Price, m.Vote " +
 		"FROM menu m " +
 		"INNER JOIN restaurant r ON m.RestId = r.Id " +
 		"HAVING 2 > ( " +
@@ -43,53 +43,56 @@ func GetWinner(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Fatal(err)
+		return nil
 	}
 	defer rows.Close()
 
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	defer rows.Close()
-
-	// An user slice to hold data from returned rows.
-	var items []data.Item
+	// An item slice to hold data from returned rows.
+	var item data.Item
 
 	// Loop through rows, using Scan to assign column data to struct fields.
 	for rows.Next() {
-		var temp data.Item
-		if err := rows.Scan(&temp.Id, &temp.Name, &temp.ResName, &temp.Location, &temp.Price, &temp.Vote); err != nil {
+		if err := rows.Scan(&item.Id, &item.Name, &item.ResId, &item.ResName, &item.Location, &item.Price, &item.Vote); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			return
+			return nil
 		}
-		items = append(items, temp)
 	}
-	itemlist, err := json.Marshal(items)
+
+	// Check if any items were found
+	if item.Id == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		return nil
+	}
+
+	itemlist, err := json.Marshal(item)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		w.WriteHeader(http.StatusInternalServerError)
+		return nil
 	}
+
 	w.Write(itemlist)
 	w.WriteHeader(http.StatusOK)
+	return &item
 }
 
-// List of the winner list
+// daily winner list
 func GetResult(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	rows, err := db.Query("SELECT m.Id, m.Name, r.Name, r.Location, m.Price, m.Vote, d.date FROM daily_winner d INNER JOIN menu m ON d.winner_id = m.Id INNER JOIN restaurant r ON m.RestId = r.Id ORDER BY d.date DESC")
+	query := "SELECT WinnerRestaurantId, WinnerMenuId, Date FROM daily_winner ORDER BY Date DESC"
+	rows, err := db.Query(query)
 	if err != nil {
+		fmt.Println("query fail")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	defer rows.Close()
 
 	// An user slice to hold data from returned rows.
-	var dailylist []data.Item
+	var dailylist []data.Daily_Winner
 
 	// Loop through rows, using Scan to assign column data to struct fields.
 	for rows.Next() {
-		var temp data.Item
-		if err := rows.Scan(&temp.Id, &temp.Name, &temp.ResName, &temp.Location, &temp.Price, &temp.Vote, &temp.Date); err != nil {
-			fmt.Println("query fail")
+		var temp data.Daily_Winner
+		if err := rows.Scan(&temp.WinnerRestaurantId, &temp.WinnerManuId, &temp.Date); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -101,5 +104,38 @@ func GetResult(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 	w.Write(dailylists)
+	w.WriteHeader(http.StatusOK)
+}
+
+// Confirm today's menu
+func ConfirmMenu(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	// Today's winner
+	winner := GetWinner(w, r, db)
+	if winner == nil {
+		fmt.Println("\nGot error\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	var id = -1
+	err := db.QueryRow("SELECT WinnerMenuId FROM daily_winner WHERE Date = CURDATE()").Scan(&id)
+	if err == nil {
+		fmt.Println("\nAlready confirmed\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	// insert into daily_winner table
+	_, err = db.Exec("INSERT INTO daily_winner (Date, WinnerMenuId, WinnerRestaurantId) VALUES(CURDATE(), ?, ?)", winner.Id, winner.ResId)
+	if err != nil {
+		fmt.Println("\nInsertion error\n")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	_, err = db.Exec("UPDATE menu SET Vote = 0")
+	if err != nil {
+		fmt.Println("\nVote reset error")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	fmt.Println("\nConfirmed\n")
 	w.WriteHeader(http.StatusOK)
 }

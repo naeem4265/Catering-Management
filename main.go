@@ -43,7 +43,7 @@ func main() {
 	// Get all users
 	router.Route("/users", func(r chi.Router) {
 		// Create user account
-		router.Post("/", func(w http.ResponseWriter, r *http.Request) {
+		r.Post("/", func(w http.ResponseWriter, r *http.Request) {
 			users.CreateUser(w, r, db)
 		})
 		// Get user list
@@ -56,7 +56,7 @@ func main() {
 	router.Route("/restaurant", func(r chi.Router) {
 		r.Use(authentication)
 		// Add restaurant
-		router.Post("/", func(w http.ResponseWriter, r *http.Request) {
+		r.Post("/", func(w http.ResponseWriter, r *http.Request) {
 			restaurants.AddRestaurant(w, r, db)
 		})
 	})
@@ -83,6 +83,10 @@ func main() {
 		// Getting results for daily winner.
 		r.Get("/result", func(w http.ResponseWriter, r *http.Request) {
 			restaurants.GetResult(w, r, db)
+		})
+		// Confirm today's menu and reset vote
+		r.Post("/confirm", func(w http.ResponseWriter, r *http.Request) {
+			restaurants.ConfirmMenu(w, r, db)
 		})
 	})
 

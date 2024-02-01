@@ -20,7 +20,8 @@ type Menu struct {
 type Item struct {
 	Id       int    `json:"itemId"`
 	Name     string `json:"itemName"`
-	ResName  string `json:"resName"`
+	ResName  string `json:"resName,omitempty"`
+	ResId    int    `json:"resId,omitempty"`
 	Location string `json:"resLocation"`
 	Price    int    `json:"itemPrice"`
 	Vote     int    `json:"itemVote"`
