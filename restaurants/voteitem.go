@@ -112,21 +112,21 @@ func ConfirmMenu(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Today's winner
 	winner := GetWinner(w, r, db)
 	if winner == nil {
-		fmt.Println("\nGot error\n")
+		fmt.Println("\nGot error")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	var id = -1
 	err := db.QueryRow("SELECT WinnerMenuId FROM daily_winner WHERE Date = CURDATE()").Scan(&id)
 	if err == nil {
-		fmt.Println("\nAlready confirmed\n")
+		fmt.Println("\nAlready confirmed")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	// insert into daily_winner table
 	_, err = db.Exec("INSERT INTO daily_winner (Date, WinnerMenuId, WinnerRestaurantId) VALUES(CURDATE(), ?, ?)", winner.Id, winner.ResId)
 	if err != nil {
-		fmt.Println("\nInsertion error\n")
+		fmt.Println("\nInsertion error")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -136,6 +136,6 @@ func ConfirmMenu(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	fmt.Println("\nConfirmed\n")
+	fmt.Println("\nConfirmed")
 	w.WriteHeader(http.StatusOK)
 }
