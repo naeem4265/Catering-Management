@@ -16,8 +16,8 @@ import (
 
 func main() {
 
-	// create a database object which can be used to connect with database.
-	db, err := sql.Open("mysql", "root:@tcp(0.0.0.0:3306)/catering_management")
+	// create a database object which can be used to connect with the database.
+	db, err := sql.Open("mysql", "root:@tcp(localhost:3306)/catering_management")
 	defer db.Close()
 	if err != nil {
 		log.Fatal(err)
@@ -27,6 +27,7 @@ func main() {
 	// Ping returns error, if unable connect to database.
 	err = db.Ping()
 	if err != nil {
+		fmt.Println("akhane")
 		panic(err)
 	}
 	fmt.Print("Database Connected\n")
@@ -75,7 +76,12 @@ func main() {
 			restaurants.VoteItem(w, r, db)
 		})
 		// Getting results for the current day.
-		r.Get("/today", func(w http.ResponseWriter, r *http.Request) {
+		r.Get("/winner", func(w http.ResponseWriter, r *http.Request) {
+			restaurants.GetWinner(w, r, db)
+		})
+
+		// Getting results for daily winner.
+		r.Get("/result", func(w http.ResponseWriter, r *http.Request) {
 			restaurants.GetResult(w, r, db)
 		})
 	})

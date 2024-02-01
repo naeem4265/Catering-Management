@@ -24,4 +24,12 @@ type Item struct {
 	Location string `json:"resLocation"`
 	Price    int    `json:"itemPrice"`
 	Vote     int    `json:"itemVote"`
+	Date     string `json:"winDate,omitempty"`
+}
+
+// Daily Winner
+type Daily_Winner struct {
+	Date               string `json:"winDate"`
+	WinnerManuId       int    `json:"winnerManuId"`
+	WinnerRestaurantId int    `json:"winnerResId"`
 }
