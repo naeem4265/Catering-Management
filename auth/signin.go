@@ -36,7 +36,7 @@ func SignIn(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 
 	// Create token
-	expirationTime := time.Now().Add(5 * time.Minute)
+	expirationTime := time.Now().Add(20 * time.Minute)
 	claims := &Claims{
 		Username: creds.Username,
 		RegisteredClaims: jwt.RegisteredClaims{

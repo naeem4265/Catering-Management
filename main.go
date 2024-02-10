@@ -10,14 +10,16 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/naeem4265/Catering-Management/auth"
+	"github.com/naeem4265/Catering-Management/data"
 	"github.com/naeem4265/Catering-Management/restaurants"
 	"github.com/naeem4265/Catering-Management/users"
 )
 
 func main() {
 
+	fmt.Println("Programm started")
 	// create a database object which can be used to connect with the database.
-	db, err := sql.Open("mysql", "root:@tcp(localhost:3306)/catering_management")
+	db, err := sql.Open("mysql", "root:1234@tcp(db:3306)/catering_management")
 	defer db.Close()
 	if err != nil {
 		log.Fatal(err)
@@ -27,8 +29,11 @@ func main() {
 	// Ping returns error, if unable connect to database.
 	err = db.Ping()
 	if err != nil {
-		fmt.Println("akhane")
 		panic(err)
+	}
+	// Create Table if not exists.
+	if err := data.CreateTables(db); err != nil {
+		log.Fatal("Database Creating error:", err)
 	}
 	fmt.Print("Database Connected\n")
 
@@ -75,7 +80,7 @@ func main() {
 		r.Put("/vote/{id}", func(w http.ResponseWriter, r *http.Request) {
 			restaurants.VoteItem(w, r, db)
 		})
-		// Getting results for the current day.
+		// Getting results for the previous day.
 		r.Get("/winner", func(w http.ResponseWriter, r *http.Request) {
 			restaurants.GetWinner(w, r, db)
 		})

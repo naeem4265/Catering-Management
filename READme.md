@@ -12,6 +12,7 @@ This project is a Catering Voting App developed for BD-23 PLC, one of the larges
 
 - **MySQL:** All the important data, from restaurant details to voting results, is securely stored in a MySQL database.
 
+- **Docker Compose:** Docker Compose is used to build and run multi-container applications. In this project, both the app and the database are containerized.
 - **Git:** Collaboration made easy! Git helps us track changes, collaborate seamlessly, and keep a neat project history.
 
 ## Features
@@ -38,7 +39,7 @@ This project is a Catering Voting App developed for BD-23 PLC, one of the larges
 - **Employee List:**
   The system allows the get the list of employee profiles via a GET request to `/users`.
 
-### Catering Voting:
+### Catering Voting: The winner restaurant should not be the winner for 3 consecutive working days.
 
 - **Get Current Day Menu:**
   Employees can view the current day's menu with a GET request to `/menu`.
@@ -83,12 +84,65 @@ These entity relationships guide the database interactions within the Catering V
 
 
 ## Getting Started
-
-Follow these steps to set up and run the Catering Voting App:
-
+#### Run Docker Compose File
 1. **Clone the repository:**
    ```bash
    git clone git@github.com:naeem4265/Catering-Management.git
+   cd Catering-Management
+   ```
+2. **Clear 3306 Port usage:**
+    ```
+    sudo lsof -i :3306
+    sudo kill <PID>
+    ```
+3. **Start application by running docker compose up:**
+   ```bash
+   docker compose down
+   docker compose up --build
+   ```
+4. **Open your Postman and navigate to [http://localhost:8080/](http://localhost:8080/) with appropiate json body:**
+    - Create User: POST [http://localhost:8080/users](http://localhost:8080/users)
+      ```
+      {
+          "username":"naeem4265",
+          "password":"1234"
+      }
+      ```
+    - Get Users: GET [http://localhost:8080/users](http://localhost:8080/users)
+    - Signin User: POST [http://localhost:8080/signin](http://localhost:8080/signin)
+      ```
+      {
+          "username":"naeem4265",
+          "password":"1234"
+      }
+      ```
+    - Add restaurant: POST [http://localhost:8080/restaurant](http://localhost:8080/restaurant)
+      ```
+      {
+          "restaurantName":"Janata",
+          "restaurantLocation": "Gazipur"
+      }
+      ```
+    - Add menu: POST [http://localhost:8080/menu](http://localhost:8080/menu)
+      ```
+      {
+          "restaurantId":1,
+          "menuName":"Biryani",
+          "menuPrice":500
+      }
+      ```
+    - Get menu: GET [http://localhost:8080/menu](http://localhost:8080/menu)
+    - Give Vode for menu id: PUT [http://localhost:8080/menu/vote/1](http://localhost:8080/menu/vote/1)
+    - Get today's menu: GET [http://localhost:8080/menu/winner](http://localhost:8080/menu/winner)
+    - Get previous result: GET [http://localhost:8080/menu/result](http://localhost:8080/menu/result)
+    - Confirm today's menu: POST [http://localhost:8080/menu/confirm](http://localhost:8080/menu/confirm)
+    - Signout User: GET [http://localhost:8080/signout](http://localhost:8080/signout)
+
+#### Run Manually
+1. **Clone the repository:**
+   ```bash
+   git clone git@github.com:naeem4265/Catering-Management.git
+   cd Catering-Management
    ```
 
 2. **Install dependencies:**
@@ -99,13 +153,13 @@ Follow these steps to set up and run the Catering Voting App:
 3. **Configure the database:**
    - Create a MySQL database with the following configurations:
      - Username: root
-     - Password: ""
+     - Password: "1234"
      - Database name: catering_management
      - Port: 3306
      - Connection: tcp
    - Execute the MySQL scripts in the `mysql/` folder to create the necessary tables and seed data.
 
-5. **Build and run the application:**
+4. **Build and run the application:**
    ```bash
    go run *.go
    ```
@@ -119,6 +173,6 @@ The Catering Management App simplifies catering decisions at BD-23, using Golang
 
 ## Note
 
-**NB: The project is under development. I am working on Dockerizing it.**
+**NB: The project is under development.**
 
 Please be aware that the Catering Management App is currently in the development phase. Features and functionality may be subject to change over time.

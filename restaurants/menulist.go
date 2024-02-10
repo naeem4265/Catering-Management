@@ -12,7 +12,7 @@ func GetMenu(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	rows, err := db.Query("SELECT m.Id, m.Name, r.Name, r.Location, m.Price, m.Vote FROM menu m INNER JOIN restaurant r ON m.RestId = r.Id ORDER BY m.Vote DESC, r.Name ASC")
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()

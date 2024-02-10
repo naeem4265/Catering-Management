@@ -16,7 +16,7 @@ type Menu struct {
 	Vote   int    `json:"menuVote"`
 }
 
-// Menu Item
+// Menu Item with restaurant information
 type Item struct {
 	Id       int    `json:"itemId"`
 	Name     string `json:"itemName"`
