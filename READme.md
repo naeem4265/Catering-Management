@@ -1,4 +1,4 @@
-# Catering Management App
+# Catering Voting Management App
 ## Overview
 This project is a Catering Voting App developed for BD-23 PLC, one of the largest and fast-growing companies in the country. The app addresses the challenge of providing diverse catering options to employees by allowing them to vote for their favorite restaurant menus. The menu with the most votes is chosen for the day.
 
